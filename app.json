@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "delivery-courier-app",
-    "slug": "delivery-courier-app",
+    "name": "app_courier_delivery",
+    "slug": "app_courier_delivery",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
