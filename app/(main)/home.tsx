@@ -1,16 +1,36 @@
 import { useState } from "react";
-import { StyleSheet, Switch, Text, View } from "react-native";
+import { StyleSheet, Switch, Text, View, TouchableOpacity } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 
 export default function HomeScreen() {
   const [isOnline, setIsOnline] = useState(false);
-
+  const [isMenuVisible, setMenuVisible] = useState(false);
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, marginTop: 10 }}>
       <View style={styles.topBar}>
         <Text style={styles.helloText}>Witaj kurierze</Text>
         <Text style={styles.status}>{isOnline ? "ONLINE" : "OFFLINE"}</Text>
         <Switch value={isOnline} onValueChange={setIsOnline} />
+        <TouchableOpacity
+    style={styles.menuIcon}
+    onPress={() => setMenuVisible(true)}
+  >
+    <View style={styles.iconContainer}>
+    <Text style={{ fontSize: 28 }}>☰</Text>
+    </View>
+  </TouchableOpacity>
+
+  {/* Panel menu */}
+  {isMenuVisible && (
+    <View style={styles.menuPanel}>
+      <Text>Profil</Text>
+      <Text>Historia zamówień</Text>
+      <Text>Ustawienia</Text>
+      <TouchableOpacity onPress={() => setMenuVisible(false)}>
+        <Text>Zamknij</Text>
+      </TouchableOpacity>
+    </View>
+  )}
       </View>
 
       <MapView
@@ -27,7 +47,7 @@ export default function HomeScreen() {
           title="Ty"
         />
       </MapView>
-    </View>
+</View>
   );
 }
 
@@ -41,4 +61,30 @@ const styles = StyleSheet.create({
   },
   status: { fontSize: 18, fontWeight: "bold" },
   helloText: { fontSize: 16, fontWeight: "bold" },
+  menuIcon: {
+    zIndex: 10
+  },
+  menuPanel: {
+    position: 'absolute',
+    top: 90,
+    right: 20,
+    width: 200,
+    height: 300,
+    backgroundColor: 'white',
+    padding: 16,
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  iconContainer: {
+    backgroundColor: '#FFF',
+    paddingTop: 5,
+    paddingBottom: 5,
+    paddingRight: 10,
+    paddingLeft: 10,
+    borderRadius: 8,
+  }
+
 });
