@@ -1,37 +1,61 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { TouchableOpacity, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import api from "../../utils/api";
 
 export default function LoginScreen() {
   const router = useRouter();
-  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = () => {
-    router.replace("/(main)/home");
+  const handleLogin = async () => {
+    try {
+      const response = await api.post("/users/sign_in", {
+        user: { email, password }
+      });
+
+      const { token } = response.data;
+
+      // save jwt to storage
+      await AsyncStorage.setItem("jwt", token);
+
+      // go to the application
+      router.replace("/(main)/home");
+    } catch (error: any) {
+      console.log("Błąd logowania:", error?.response?.data || error.message);
+      alert("Niepoprawny login lub hasło");
+    }
   };
 
   return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Courier App</Text>
-        <TextInput
-          placeholder="+48 555 321 123"
-          style={styles.input}
-          keyboardType="phone-pad"
-          value={phone}
-          onChangeText={setPhone}
-        />
-        <TextInput
-         placeholder="********"
-         style={styles.input}
-         keyboardType="phone-pad"
-         value={password}
-         onChangeText={setPassword}
-         />
-        <TouchableOpacity style={styles.button} onPress={handleLogin}> 
-            <Text style={styles.buttonText}>Zaloguj</Text>
-        </TouchableOpacity>
-      </View>
+    <View style={styles.container}>
+      <Text style={styles.title}>Courier App</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Adres-email"
+        keyboardType="default"
+        value={email}
+        onChangeText={setEmail}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Hasło"
+        secureTextEntry={true}
+        keyboardType="default"
+        value={password}
+        onChangeText={setPassword}
+      />
+      <TouchableOpacity style={styles.button} onPress={handleLogin}>
+        <Text style={styles.buttonText}>Zaloguj</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 
