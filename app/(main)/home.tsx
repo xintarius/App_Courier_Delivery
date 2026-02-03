@@ -13,13 +13,12 @@ export default function HomeScreen() {
         <Switch value={isOnline} onValueChange={setIsOnline} />
         <TouchableOpacity
     style={styles.menuIcon}
-    onPress={() => setMenuVisible(true)}
+    onPress={() => setMenuVisible(!isMenuVisible)}
   >
     <View style={styles.iconContainer}>
     <Text style={{ fontSize: 28 }}>☰</Text>
     </View>
   </TouchableOpacity>
-
   {/* Panel menu */}
   {isMenuVisible && (
     <View style={styles.menuPanel}>
@@ -31,6 +30,10 @@ export default function HomeScreen() {
       </TouchableOpacity>
     </View>
   )}
+      </View>
+      <View style={styles.midContext}>
+      <Text style={styles.balance}>Saldo gotówkowe: 0 zł</Text>
+      <Text style={styles.earnings}>Zarobki: 0 zł</Text>
       </View>
 
       <MapView
@@ -53,7 +56,7 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   topBar: {
-    flexDirection: "row",
+    flexDirection: 'row',
     justifyContent: "space-between",
     alignItems: "center",
     padding: 16,
@@ -61,6 +64,9 @@ const styles = StyleSheet.create({
   },
   status: { fontSize: 18, fontWeight: "bold" },
   helloText: { fontSize: 16, fontWeight: "bold" },
+  midContext: {display: 'flex', flexDirection: 'column', backgroundColor: 'white'},
+  balance: {fontWeight: 'bold'},
+  earnings: {fontWeight: 'bold'},
   menuIcon: {
     zIndex: 10
   },
@@ -77,6 +83,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 10,
     elevation: 5,
+    zIndex: 10,
   },
   iconContainer: {
     backgroundColor: '#FFF',
