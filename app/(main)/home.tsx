@@ -1,10 +1,38 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { StyleSheet, Switch, Text, View, TouchableOpacity } from "react-native";
 import MapView, { Marker } from "react-native-maps";
+import * as Location from 'expo-location';
 
 export default function HomeScreen() {
   const [isOnline, setIsOnline] = useState(false);
   const [isMenuVisible, setMenuVisible] = useState(false);
+  const [location, setLocation] = useState<Location.LocationObject | null>(null)
+  const [errMsg, setErrMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if(status !== 'granted') {
+        setErrMsg('Odmówiono dostępu do lokalizacji');
+        return;
+      }
+
+      let currentLocation = await Location.getCurrentPositionAsync({});
+      setLocation(currentLocation);
+
+      await Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.High,
+          distanceInterval: 10,
+        },
+        (newLocation) => {
+          setLocation(newLocation);
+        
+        }
+      );
+    })();
+  }, []);
+
   return (
     <View style={{ flex: 1, marginTop: 10 }}>
       <View style={styles.topBar}>
@@ -36,6 +64,9 @@ export default function HomeScreen() {
       <Text style={styles.earnings}>Zarobki: 0 zł</Text>
       </View>
 
+      <View style={styles.searchOrderFooter}>
+        <Text style={styles.searchText}>Szukam zamówień...</Text>
+      </View>
       <MapView
         style={{ flex: 1 }}
         initialRegion={{
@@ -44,15 +75,26 @@ export default function HomeScreen() {
           latitudeDelta: 0.05,
           longitudeDelta: 0.05,
         }}
+        showsUserLocation={true}
+        followsUserLocation={true}
       >
+        {location && (
         <Marker
-          coordinate={{ latitude: 52.2297, longitude: 21.0122 }}
-          title="Ty"
+          coordinate={{
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude 
+          }}
         />
+        )}
       </MapView>
-</View>
-  );
-}
+      {errMsg && (
+        <View style={styles.errorBanner}>
+          <Text style={{ color: 'white' }}>{errMsg}</Text>
+        </View>
+        )}
+        </View>
+      );
+      }
 
 const styles = StyleSheet.create({
   topBar: {
@@ -92,6 +134,27 @@ const styles = StyleSheet.create({
     paddingRight: 10,
     paddingLeft: 10,
     borderRadius: 8,
+  },
+  searchOrderFooter: {
+    position: 'absolute',
+    zIndex: 10,
+    backgroundColor: 'white',
+    bottom: 0,
+    width: '100%',
+    paddingBottom: 80 
+  },
+  searchText: {
+    paddingTop: 20,
+    fontSize: 20,
+    textAlign: 'center',
+    fontWeight: 'bold'
+  },
+  errorBanner: {
+    position: 'absolute',
+    top: 50,
+    backgroundColor: 'red',
+    padding: 10,
+    width: '100%',
+    zIndex: 2000
   }
-
 });

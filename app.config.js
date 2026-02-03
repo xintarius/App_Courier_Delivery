@@ -9,7 +9,7 @@ export default {
     icon: "./assets/images/icon.png",
     scheme: "deliverycourierapp",
     userInterfaceStyle: "automatic",
-    newArchEnabled: true,
+    newArchEnabled: false,
     extra: {
       backendUrl: process.env.BACKEND_BASE_URL,
     },
@@ -23,7 +23,8 @@ export default {
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      edgeToEdgeEnabled: true,
+      softwareKeyboardLayoutMode: "pan",
+      edgeToEdgeEnabled: false,
       predictiveBackGestureEnabled: false
     },
     web: {
@@ -32,6 +33,13 @@ export default {
     },
     plugins: [
       "expo-router",
+      [
+        "expo-navigation-bar",
+        {
+          "backgroundColor": "#000000",
+          "appearance": "light"
+        },
+      ],
       [
         "expo-splash-screen",
         {
