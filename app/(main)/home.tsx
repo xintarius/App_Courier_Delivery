@@ -27,7 +27,6 @@ export default function HomeScreen() {
         },
         (newLocation) => {
           setLocation(newLocation);
-        
         }
       );
     })();
@@ -59,11 +58,16 @@ export default function HomeScreen() {
     </View>
   )}
       </View>
+      <View style={styles.orderCountContainer}>
+        <Text style={styles.orderCount}>Liczba zamówień: 0</Text>
+      </View>
       <View style={styles.midContext}>
       <Text style={styles.balance}>Saldo gotówkowe: 0 zł</Text>
       <Text style={styles.earnings}>Zarobki: 0 zł</Text>
       </View>
-
+      <View style={styles.orderContainer}>
+        <Text style={styles.newOrder}>Zamówienie</Text>
+      </View>
       <View style={styles.searchOrderFooter}>
         <Text style={styles.searchText}>Szukam zamówień...</Text>
       </View>
@@ -156,5 +160,25 @@ const styles = StyleSheet.create({
     padding: 10,
     width: '100%',
     zIndex: 2000
-  }
+  },
+  orderCountContainer: {
+    display: 'flex'
+  },
+  orderCount: {
+    textAlign: 'center',
+  },
+  orderContainer: {
+    position: 'absolute',
+    bottom: 0,
+    paddingBottom: 300,
+    zIndex: 100,
+    backgroundColor: 'white',
+    width: '100%'
+  },
+  newOrder: {
+    fontWeight: 'bold',
+    fontSize: 20,
+    textAlign: 'center',
+    paddingTop: 10,
+  },
 });
