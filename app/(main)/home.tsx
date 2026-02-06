@@ -2,13 +2,18 @@ import { useState, useEffect } from "react";
 import { StyleSheet, Switch, Text, View, TouchableOpacity } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from 'expo-location';
+import { disconnectCable, getConsumer } from '../../utils/cable'
+import { useRouter } from "expo-router";
 
 export default function HomeScreen() {
   const [isOnline, setIsOnline] = useState(false);
   const [isMenuVisible, setMenuVisible] = useState(false);
   const [location, setLocation] = useState<Location.LocationObject | null>(null)
   const [errMsg, setErrMsg] = useState<string | null>(null);
+  const [currentOrders, setCurrentOrders] = useState<any[]>([]);
+  const router = useRouter();
 
+  // Lokalization
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -31,6 +36,68 @@ export default function HomeScreen() {
       );
     })();
   }, []);
+
+  const handleIncomingData = (data: any) => {
+  if (data.type === 'CURRENT_STATE' || data.type === 'CURRENT_ORDERS') {
+    setCurrentOrders(data.orders || []);
+  } else if (data.type === 'NEW_ORDER') {
+    setCurrentOrders((prev) => {
+      const currentList = Array.isArray(prev) ? prev : [];
+      return [data.order, ...currentList];
+    });
+  } else if (data.type === 'DELETE_ORDER') {
+    setCurrentOrders((prev) => prev.filter(order => order.order_id !== data.order_id));
+  }
+};
+
+  useEffect(() => {
+  let subscription: any = null;
+
+  const connectionToCable = async () => {
+    try {
+      const consumer = await getConsumer();
+      if (!consumer) {
+        router.replace('/(auth)/login')
+        return;
+      }
+
+      subscription = consumer.subscriptions.create(
+        { channel: 'OrdersChannel' },
+        {
+          connected: () => {
+            console.log("✅ SUKCES: Kanał OrdersChannel jest aktywny!");
+          },
+          disconnected: () => {
+            console.log("ℹ️ Rozłączono z kanałem.");
+          },
+          rejected: () => {
+            console.error("Połączenie odrzucone (Token prawdopodobnie wygasł)");
+            disconnectCable(); 
+          },
+          received: (data: any) => {
+            console.log("📩 ODEBRANO DANE:", data);
+            handleIncomingData(data);
+          },
+        }
+      );
+    } catch (err) {
+      console.error("Błąd podczas setupu subskrypcji:", err);
+    }
+  };
+
+  connectionToCable();
+
+  return () => {
+    if (subscription) {
+      try {
+        console.log("🧹 Sprzątanie subskrypcji...");
+        subscription.unsubscribe();
+      } catch (e) {
+        console.warn("Błąd podczas odpinania subskrypcji:", e);
+      }
+    }
+  };
+}, []);
 
   return (
     <View style={{ flex: 1, marginTop: 10 }}>
@@ -67,6 +134,15 @@ export default function HomeScreen() {
       </View>
       <View style={styles.orderContainer}>
         <Text style={styles.newOrder}>Zamówienie</Text>
+        {currentOrders && currentOrders.length > 0 ? (
+          currentOrders.map((order, index) => (
+          <View key={order.order_id ? order.order_id.toString() : index}>
+            <Text>Restauracja: {order.vendor_name}</Text>
+          </View>
+          ))
+        ) : (
+          <Text>Szukam zamówień...</Text>
+        )}
       </View>
       <View style={styles.searchOrderFooter}>
         <Text style={styles.searchText}>Szukam zamówień...</Text>
